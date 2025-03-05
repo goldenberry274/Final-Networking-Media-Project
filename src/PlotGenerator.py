@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 import matplotlib.pyplot as plt
 from scapy.layers.inet import IP, TCP
 from scapy.layers.tls.all import TLS
@@ -8,13 +9,14 @@ from collections import Counter
 import numpy as np
 
 # Folder containing PCAP files
-pcap_folder = input("Enter file path: ")
+recordings_folder = "Recordings"
 plot_folder = "plots"
 
-# Ensure the PCAP folder exists
-if not os.path.exists(pcap_folder):
-    print(f"Error: Folder '{pcap_folder}' does not exist.")
+# Ensure the Recordings folder exists
+if not os.path.exists(recordings_folder):
+    print(f"Error: Folder '{recordings_folder}' does not exist.")
     exit(1)
+
 
 os.makedirs(plot_folder, exist_ok=True)
 
@@ -46,12 +48,16 @@ while True:
     tcp_flag_counters = {}
 
     # Iterate over all PCAP files in the folder
-    for pcap_file in os.listdir(pcap_folder):
+    for pcap_file in os.listdir(recordings_folder):
+        file_path = os.path.join(recordings_folder, pcap_file)
+
+        if not os.path.isfile(file_path):
+            print(f"Skipping non-file entry: {pcap_file}")
+            continue
+
         if not (pcap_file.endswith(".pcap") or pcap_file.endswith(".pcapng")):
             print(f"Skipping non-PCAP file: {pcap_file}")
             continue
-
-        file_path = os.path.join(pcap_folder, pcap_file)
 
         try:
             packets = rdpcap(file_path)
